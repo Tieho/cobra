@@ -38,6 +38,7 @@ namespace Ldtpd
     class Tree
     {
         Utils utils;
+        static int maxPagesSelectRowSearches = 0;
         public Tree(Utils utils)
         {
             this.utils = utils;
@@ -109,9 +110,125 @@ namespace Ldtpd
             }
             return 0;
         }
+        private int SearchRowHelper(AutomationElement childHandle, String text,
+            bool partialMatch, bool searchDown, int[] treePos)
+        {
+            Keyboard kb = new Keyboard(utils);
+
+            ControlType[] type = new ControlType[4] { ControlType.TreeItem,
+                ControlType.ListItem, ControlType.DataItem,
+                ControlType.Custom };
+            if (partialMatch)
+                text += "*";
+
+            AutomationElement rowElement = utils.GetObjectHandle(childHandle,
+                text, type, false);
+
+            // Found the element
+            if(rowElement != null)
+            {
+                // Now let's make sure the element is really in view
+                // (seems that a valid element is sometimes returned
+                // even if it is under the view header)
+                Rect rowRect = rowElement.Current.BoundingRectangle;
+                int count = 0;
+
+                if(searchDown)
+                {
+                    while(rowRect.Y >= treePos[1] + treePos[3])
+                    {
+                        kb.GenerateKeyEvent("<pgdown>");
+
+                        rowElement = utils.GetObjectHandle(childHandle,
+                            text, type, false);
+                        rowRect = rowElement.Current.BoundingRectangle;
+
+                        // Make sure we don't hang here if something is wrong
+                        count++;
+
+                        if(count > 100)
+                            return 0;
+                    }
+                }
+                else
+                {
+                    while(rowRect.Y - rowRect.Height <= treePos[1])
+                    {
+                        kb.GenerateKeyEvent("<pgup>");
+
+                        rowElement = utils.GetObjectHandle(childHandle,
+                            text, type, false);
+                        rowRect = rowElement.Current.BoundingRectangle;
+
+                        // Make sure we don't hang here if something is wrong
+                        count++;
+
+                        if(count > 100)
+                            return 0;
+                    }
+                }
+
+                return 1;
+            }
+
+            return 0;
+        }
+        private int SearchRowWorker(String windowName, String objName,
+            String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true, bool doThrow = true)
+        {
+            AutomationElement childHandle = GetObjectHandle(windowName,
+                objName);
+
+            Generic gen = new Generic(utils);
+            int[] treePos = gen.GetObjectSize(windowName, objName);
+
+            if(SearchRowHelper(childHandle, text, partialMatch, searchDown, treePos) == 1)
+                return 1;
+
+            childHandle.SetFocus();
+            utils.InternalClick(childHandle);
+
+            Keyboard kb = new Keyboard(utils);
+
+            // There doesn't seem to be any way to know if we've scrolled all they way up or down,
+            // so user has to tell how many pages to scroll at maximum
+            for(int p = 0; p < maxPages; p++)
+            {
+                if(searchDown)
+                    kb.GenerateKeyEvent("<pgdown>");
+                else
+                    kb.GenerateKeyEvent("<pgup>");
+
+                if(SearchRowHelper(childHandle, text, partialMatch, searchDown, treePos) == 1)
+                    return 1;
+            }
+
+            if(doThrow)
+            {
+                throw new XmlRpcFaultException(123,
+                    "Unable to find the item in list: " + text);
+            }
+
+            return 0;
+        }
+        public int SearchRow(String windowName, String objName,
+            String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true)
+        {
+            return SearchRowWorker(windowName, objName, text, partialMatch, maxPages, searchDown, true);
+        }
+        public void SetMaxPagesSelectRowSearches(int maxPages)
+        {
+            maxPagesSelectRowSearches = maxPages;
+        }
         public int SelectRow(String windowName, String objName,
             String text, bool partialMatch = false)
         {
+            if(maxPagesSelectRowSearches > 0)
+            {
+                if(SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, true, false) == 0)
+                    SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, false, false);
+            }
+
             if (String.IsNullOrEmpty(text))
             {
                 throw new XmlRpcFaultException(123, "Argument cannot be empty.");

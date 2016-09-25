@@ -416,6 +416,10 @@ def launchapp(cmd, args = [], delay = 0, env = 1, lang = "C"):
     return _remote_launchapp(cmd, args, delay, env, lang)
 def hasstate(window_name, object_name, state, guiTimeOut = 0):
     return _remote_hasstate(window_name, object_name, state, guiTimeOut)
+def searchrow(window_name, object_name, row_text, maxRows, searchDown):
+    return _remote_searchrow(window_name, object_name, row_text, False, maxRows, searchDown)
+def setmaxpagesselectrowsearches(maxRows):
+    return _remote_setmaxpagesselectrowsearches(maxRows)
 def selectrow(window_name, object_name, row_text):
     return _remote_selectrow(window_name, object_name, row_text, False)
 def multiselect(window_name, object_name, row_text_array):

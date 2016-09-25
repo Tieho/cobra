@@ -200,6 +200,23 @@ public
       raise LdtpExecutionError.new(param.faultString)
     end
   end
+  def searchrow(object_name, row_text, maxPages, searchDown)
+    ok, param = @client.call2("searchrow", @window_name, object_name,
+                              row_text, false, maxPages, searchDown)
+    if ok then
+      return param
+    else
+      raise LdtpExecutionError.new(param.faultString)
+    end
+  end
+  def setmaxpagesselectrowsearches(maxPages)
+    ok, param = @client.call2("setmaxpagesselectrowsearches", maxPages)
+    if ok then
+      return param
+    else
+      raise LdtpExecutionError.new(param.faultString)
+    end
+  end
   def selectrow(object_name, row_text)
     ok, param = @client.call2("selectrow", @window_name, object_name,
                               row_text, false)

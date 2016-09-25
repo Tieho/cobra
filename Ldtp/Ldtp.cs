@@ -239,6 +239,11 @@ namespace Ldtp
         int VerifyTabName(String windowName, String objName, String tabName);
         [XmlRpcMethod("getrowcount")]
         int GetRowCount(String windowName, String objName);
+        [XmlRpcMethod("searchrow")]
+        int SearchRow(String windowName, String objName, String text,
+            bool partialMatch = false, int maxPages = 10, bool searchDown = true);
+        [XmlRpcMethod("setmaxpagesselectrowsearches")]
+        int SetMaxPagesSelectRowSearches(int maxPages);
         [XmlRpcMethod("selectrow")]
         int SelectRow(String windowName, String objName, String text,
             bool partialMatch = false);

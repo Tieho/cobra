@@ -1061,6 +1061,35 @@ namespace Ldtpd
                 tree = null;
             }
         }
+        [XmlRpcMethod("searchrow",
+            Description = "Search for the given row in tree or list item.")]
+        public int SearchRow(String windowName, String objName,
+            String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true)
+        {
+            Tree tree = new Tree(this);
+            try
+            {
+                return tree.SearchRow(windowName, objName, text, partialMatch, maxPages, searchDown);
+            }
+            finally
+            {
+                tree = null;
+            }
+        }
+        [XmlRpcMethod("setmaxpagesselectrowsearches",
+            Description = "Search for the given row in tree or list item.")]
+        public void SetMaxPagesSelectRowSearches(int maxPages)
+        {
+            Tree tree = new Tree(this);
+            try
+            {
+                tree.SetMaxPagesSelectRowSearches(maxPages);
+            }
+            finally
+            {
+                tree = null;
+            }
+        }
         [XmlRpcMethod("selectrow",
             Description = "Select the given row in tree or list item.")]
         public int SelectRow(String windowName, String objName,
