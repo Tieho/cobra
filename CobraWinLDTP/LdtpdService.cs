@@ -57,24 +57,33 @@ namespace WinLdtpdService
                 ldtpPort = "4118";
             common = new Common(debug);
             windowList = new WindowList(common);
-            listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:" + ldtpPort + "/");
-            listener.Prefixes.Add("http://+:" + ldtpPort + "/");
-            // Listen on all possible IP address
-            if (listenAllInterface != null && listenAllInterface.Length > 0)
+
+            try
             {
-                if (debug)
-                    Console.WriteLine("Listening on all interface");
-                listener.Prefixes.Add("http://*:" + ldtpPort + "/");
+                listener = new HttpListener();
+                listener.Prefixes.Add("http://localhost:" + ldtpPort + "/");
+                listener.Prefixes.Add("http://+:" + ldtpPort + "/");
+                // Listen on all possible IP address
+                if (listenAllInterface != null && listenAllInterface.Length > 0)
+                {
+                    if (debug)
+                        Console.WriteLine("Listening on all interface");
+                    listener.Prefixes.Add("http://*:" + ldtpPort + "/");
+                }
+                else
+                {
+                    // For Windows 8, still you need to add firewall rules
+                    // Refer: README.txt
+                    if (debug)
+                        Console.WriteLine("Listening only on local interface");
+                }
+                listener.Start();
             }
-            else
+            catch(HttpListenerException ex)
             {
-                // For Windows 8, still you need to add firewall rules
-                // Refer: README.txt
-                if (debug)
-                    Console.WriteLine("Listening only on local interface");
+                common.LogMessage(ex);
+                System.Environment.Exit(1);
             }
-            listener.Start();
             svc = new Core(windowList, common, debug);
         }
 
@@ -185,24 +194,33 @@ namespace WinLdtpdService
             Console.ReadLine();
             /**/
             WindowList windowList = new WindowList(common);
-            HttpListener listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:" + ldtpPort + "/");
-            listener.Prefixes.Add("http://+:" + ldtpPort + "/");
-            // Listen on all possible IP address
-            if (String.IsNullOrEmpty(listenAllInterface))
+            HttpListener listener = null;
+            try
             {
-                if (debug)
-                    Console.WriteLine("Listening on all interface");
-                listener.Prefixes.Add("http://*:" + ldtpPort + "/");
+                listener = new HttpListener();
+                listener.Prefixes.Add("http://localhost:" + ldtpPort + "/");
+                listener.Prefixes.Add("http://+:" + ldtpPort + "/");
+                // Listen on all possible IP address
+                if (String.IsNullOrEmpty(listenAllInterface))
+                {
+                    if (debug)
+                        Console.WriteLine("Listening on all interface");
+                    listener.Prefixes.Add("http://*:" + ldtpPort + "/");
+                }
+                else
+                {
+                    // For Windows 8, still you need to add firewall rules
+                    // Refer: README.txt
+                    if (debug)
+                        Console.WriteLine("Listening only on local interface");
+                }
+                listener.Start();
             }
-            else
+            catch(HttpListenerException ex)
             {
-                // For Windows 8, still you need to add firewall rules
-                // Refer: README.txt
-                if (debug)
-                    Console.WriteLine("Listening only on local interface");
+                common.LogMessage(ex);
+                System.Environment.Exit(1);
             }
-            listener.Start();
             XmlRpcListenerService svc = new Core(windowList, common, debug);
             try
             {
