@@ -174,7 +174,7 @@ namespace Ldtpd
             return 0;
         }
         private int SearchRowWorker(String windowName, String objName,
-            String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true, bool doThrow = true)
+            String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true)
         {
             AutomationElement childHandle = GetObjectHandle(windowName,
                 objName);
@@ -203,18 +203,12 @@ namespace Ldtpd
                     return 1;
             }
 
-            if(doThrow)
-            {
-                throw new XmlRpcFaultException(123,
-                    "Unable to find the item in list: " + text);
-            }
-
             return 0;
         }
         public int SearchRow(String windowName, String objName,
             String text, bool partialMatch = false, int maxPages = 10, bool searchDown = true)
         {
-            return SearchRowWorker(windowName, objName, text, partialMatch, maxPages, searchDown, true);
+            return SearchRowWorker(windowName, objName, text, partialMatch, maxPages, searchDown);
         }
         public void SetMaxPagesSelectRowSearches(int maxPages)
         {
@@ -225,8 +219,8 @@ namespace Ldtpd
         {
             if(maxPagesSelectRowSearches > 0)
             {
-                if(SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, true, false) == 0)
-                    SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, false, false);
+                if(SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, true) == 0)
+                    SearchRowWorker(windowName, objName, text, partialMatch, maxPagesSelectRowSearches, false);
             }
 
             if (String.IsNullOrEmpty(text))
