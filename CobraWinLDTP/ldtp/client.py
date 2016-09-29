@@ -37,6 +37,7 @@ except ImportError:
     import xmlrpc.client as xmlrpclib
 _python3 = False
 _python26 = False
+_httpCon = 0
 if sys.version_info[:2] <= (2, 6):
     _python26 = True
 if sys.version_info[:2] >= (3, 0):
@@ -122,6 +123,7 @@ class Transport(xmlrpclib.Transport):
     # @return XML response.
 
     def request(self, host, handler, request_body, verbose=0):
+        global _httpCon
         # issue XML-RPC request
         retry_count = 1
         while True:
@@ -133,7 +135,9 @@ class Transport(xmlrpclib.Transport):
                         self, host, handler, request_body, verbose=verbose)
                 if not _python3:
   		    # Follwing implementation not supported in Python <= 2.6
-                    h = self.make_connection(host)
+                    if not _httpCon:
+                        _httpCon = self.make_connection(host)
+                    h = _httpCon
                     if verbose:
                         h.set_debuglevel(1)
 
