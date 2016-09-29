@@ -516,6 +516,11 @@ namespace Ldtpd
                     // maximize / minimize button
                     LogMessage(ex);
                 }
+
+                utils.InternalClick(childHandle);
+                return 1;
+
+/*                
                 if (childHandle.Current.ControlType == ControlType.Pane)
                 {
                     // NOTE: Work around, as the pane doesn't seem to work
@@ -569,6 +574,7 @@ namespace Ldtpd
                     utils.InternalClick(childHandle);
                     return 1;
                 }
+*/
             }
             catch (Exception ex)
             {
