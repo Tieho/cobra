@@ -175,6 +175,7 @@ class Transport(xmlrpclib.Transport):
                             sigusr1 = signal.signal(signal.SIGUSR1, self._handle_signal)
                             sigalrm = signal.signal(signal.SIGALRM, self._handle_signal)
                             sigchld = signal.signal(signal.SIGCHLD, self._handle_signal)
+                        _httpCon = 0
                         self._spawn_daemon()
                         if _ldtp_windows_env:
                             time.sleep(5)
