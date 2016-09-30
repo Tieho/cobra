@@ -1355,12 +1355,15 @@ namespace Ldtpd
                     }
                     Object invoke = null;
                     childHandle.SetFocus();
+                    InternalClick(childHandle);
+/*                    
                     if (childHandle.TryGetCurrentPattern(InvokePattern.Pattern,
                                      out invoke))
                         ((InvokePattern)invoke).Invoke();
                     else
                         ((TogglePattern)pattern).Toggle();
                     invoke = null;
+*/
                     return 1;
                 }
                 else if (childHandle.TryGetCurrentPattern(SelectionItemPattern.Pattern,
