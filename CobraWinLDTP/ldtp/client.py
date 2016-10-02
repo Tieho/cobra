@@ -161,9 +161,9 @@ class Transport(xmlrpclib.Transport):
 
                 return unmarshaller.close()
             except SocketError as e:
-                if ((_ldtp_windows_env and e[0] == 10061) or \
-                        (hasattr(e, 'errno') and (e.errno == 111 or \
+                if ((hasattr(e, 'errno') and (e.errno == 111 or \
                                                       e.errno == 61 or \
+                                                      e.errno == 10061 or \
                                                       e.errno == 146))) \
                         and 'localhost' in host:
                     if hasattr(self, 'close'):
@@ -203,7 +203,7 @@ class Transport(xmlrpclib.Transport):
     def __del__(self):
         try:
             if hasattr(self, 'close'):
-                self.close()
+                self.close(True)
             self.kill_daemon()
         except:
             pass
