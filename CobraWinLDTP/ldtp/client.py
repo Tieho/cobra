@@ -38,6 +38,7 @@ except ImportError:
 _python3 = False
 _python26 = False
 _httpCon = 0
+_onair = 0
 if sys.version_info[:2] <= (2, 6):
     _python26 = True
 if sys.version_info[:2] >= (3, 0):
@@ -113,6 +114,13 @@ class Transport(xmlrpclib.Transport):
             import httplib
             host, extra_headers, x509 = self.get_host_info(host)
             return httplib.HTTPConnection(host)
+    if _python3:
+        def make_connection(self, host):
+            # create a HTTP connection object from a host descriptor
+            import http.client
+            host, extra_headers, x509 = self.get_host_info(host)
+            return http.client.HTTPConnection(host)
+
     ##
     # Send a complete request, and parse the response.
     #
@@ -124,6 +132,7 @@ class Transport(xmlrpclib.Transport):
 
     def request(self, host, handler, request_body, verbose=0):
         global _httpCon
+        global _onair
         # issue XML-RPC request
         retry_count = 1
         while True:
@@ -134,24 +143,36 @@ class Transport(xmlrpclib.Transport):
                     return xmlrpclib.Transport.request(
                         self, host, handler, request_body, verbose=verbose)
                 if not _python3:
-  		    # Follwing implementation not supported in Python <= 2.6
-                    if not _httpCon:
+     		    # Follwing implementation not supported in Python <= 2.6
+#                    if not _httpCon:
+                    if 1:
                         _httpCon = self.make_connection(host)
                     h = _httpCon
+#                    h = self.make_connection(host)
                     if verbose:
                         h.set_debuglevel(1)
 
                     self.send_request(h, handler, request_body)
+                    _onair = _onair + 1
                     self.send_host(h, host)
                     self.send_user_agent(h)
                     self.send_content(h, request_body)
                 else:
-                    h=self.send_request(host, handler, request_body, bool(verbose))
+#                    if not _httpCon:
+                    if 1:
+                        _httpCon = self.make_connection(host)
+                    h = _httpCon
+#                    h = self.make_connection(host)
+
+                    h.request("POST", handler, request_body)
+                    _onair = _onair + 1
 
                 response = h.getresponse()
+                _onair = _onair - 1
 
-                if response.status != 200:
-                    raise xmlrpclib.ProtocolError(host + handler, response.status,
+                if not _python3:
+                    if response.status != 200:
+                        raise xmlrpclib.ProtocolError(host + handler, response.status,
                                                   response.reason, response.msg.headers)
 
                 payload = response.read()
