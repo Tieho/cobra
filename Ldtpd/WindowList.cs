@@ -38,6 +38,7 @@ namespace Ldtpd
 {
     public class WindowList : List<AutomationElement>
     {
+        private static Mutex mutex = new Mutex();
         Common common;
         Thread backgroundThread;
         ArrayList watchWindowList;
@@ -93,6 +94,8 @@ namespace Ldtpd
                 {
                     try
                     {
+                        mutex.WaitOne();
+
                         if (this.IndexOf(element) == -1)
                         {
                             // New parent window is available, add it to the list
@@ -110,11 +113,17 @@ namespace Ldtpd
                         this.Clear();
                         continue;
                     }
+                    finally
+                    {
+                        mutex.ReleaseMutex();
+                    }
                     c = element.FindAll(TreeScope.Subtree, condition);
                     foreach (AutomationElement e in c)
                     {
                         try // ".IndexOf" sometimes throws an exception on my system
                         {
+                            mutex.WaitOne();
+
                             if (this.IndexOf(e) == -1)
                             {
                                 // New subwindow is available, add it to the list
@@ -130,6 +139,10 @@ namespace Ldtpd
                             // In case of an exception during IndexOf-call, the program adds the element as
                             // new element to the windowList. Same code like on other positions.
                             this.Add(e);
+                        }
+                        finally
+                        {
+                            mutex.ReleaseMutex();
                         }
                     }
                     // Get next application in the list
@@ -187,6 +200,8 @@ namespace Ldtpd
             }
             try
             {
+                mutex.WaitOne();
+
                 foreach (AutomationElement el in windowTmpList)
                 {
                     try
@@ -204,6 +219,11 @@ namespace Ldtpd
             {
                 common.LogMessage(ex);
             }
+            finally
+            {
+                mutex.ReleaseMutex();
+            }
+
             windowTmpList = null;
             // With GC collect, noticed very less memory being used all the time
             GC.Collect();
@@ -270,6 +290,8 @@ namespace Ldtpd
              * */
             try
             {
+                mutex.WaitOne();
+
                 AutomationElement element;
                 element = sender as AutomationElement;
                 if (e.EventId == WindowPattern.WindowOpenedEvent)
@@ -297,9 +319,13 @@ namespace Ldtpd
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Do nothing
+            }
+            finally
+            {
+                mutex.ReleaseMutex();
             }
         }
         private void OnWindowDelete(object sender, AutomationEventArgs e)
@@ -309,9 +335,12 @@ namespace Ldtpd
              * */
             try
             {
-                AutomationElement element = sender as AutomationElement;
+                mutex.WaitOne();
+
                 if (e.EventId == WindowPattern.WindowClosedEvent)
                 {
+                    AutomationElement element = sender as AutomationElement;
+
                     if (element != null)
                     {
                         string windowName = element.Current.Name;
@@ -326,11 +355,13 @@ namespace Ldtpd
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Since window list is added / removed in different thread
-                // values of windowList might be altered and an exception is thrown
-                // Just handle the global exception
+                // Do nothing
+            }
+            finally
+            {
+                mutex.ReleaseMutex();
             }
         }
     }
