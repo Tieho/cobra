@@ -37,8 +37,6 @@ except ImportError:
     import xmlrpc.client as xmlrpclib
 _python3 = False
 _python26 = False
-_httpCon = 0
-_onair = 0
 _spawnedDaemon = 0
 if sys.version_info[:2] <= (2, 6):
     _python26 = True
@@ -132,8 +130,6 @@ class Transport(xmlrpclib.Transport):
     # @return XML response.
 
     def request(self, host, handler, request_body, verbose=0):
-        global _httpCon
-        global _onair
         global _spawnedDaemon
         # issue XML-RPC request
         retry_count = 1
@@ -146,36 +142,27 @@ class Transport(xmlrpclib.Transport):
                         self, host, handler, request_body, verbose=verbose)
                 if not _python3:
      		    # Follwing implementation not supported in Python <= 2.6
-#                    if not _httpCon:
-                    if 1:
-                        _httpCon = self.make_connection(host)
-                    h = _httpCon
-#                    h = self.make_connection(host)
+                    h = self.make_connection(host)
                     if verbose:
                         h.set_debuglevel(1)
 
                     self.send_request(h, handler, request_body)
-                    _onair = _onair + 1
                     self.send_host(h, host)
                     self.send_user_agent(h)
                     self.send_content(h, request_body)
                 else:
-#                    if not _httpCon:
-                    if 1:
-                        _httpCon = self.make_connection(host)
-                    h = _httpCon
-#                    h = self.make_connection(host)
-
+                    h = self.make_connection(host)
                     h.request("POST", handler, request_body)
-                    _onair = _onair + 1
 
                 response = h.getresponse()
-                _onair = _onair - 1
 
-                if not _python3:
-                    if response.status != 200:
+                if response.status != 200:
+                    if not _python3:
                         raise xmlrpclib.ProtocolError(host + handler, response.status,
                                                   response.reason, response.msg.headers)
+                    else:
+                        raise xmlrpclib.ProtocolError(host + handler, response.status,
+                                                  response.reason, "")
 
                 payload = response.read()
                 parser, unmarshaller = self.getparser()
@@ -198,7 +185,6 @@ class Transport(xmlrpclib.Transport):
                             sigusr1 = signal.signal(signal.SIGUSR1, self._handle_signal)
                             sigalrm = signal.signal(signal.SIGALRM, self._handle_signal)
                             sigchld = signal.signal(signal.SIGCHLD, self._handle_signal)
-                        _httpCon = 0
                         if(_spawnedDaemon == 0):
                             self._spawn_daemon()
                             _spawnedDaemon = 1
