@@ -165,9 +165,15 @@ namespace Ldtpd
                 {
                     throw new XmlRpcFaultException(123, "Object state is disabled");
                 }
+                elementItem = null;
+/*                
                 elementItem = utils.GetObjectHandle(childHandle, "Open", type, true);
-                LogMessage("elementItem: " + elementItem.Current.Name +
+                if (elementItem != null)
+                {
+                    LogMessage("elementItem: " + elementItem.Current.Name +
                                     " - " + elementItem.Current.ControlType.ProgrammaticName);
+                }
+*/
                 if (childHandle.TryGetCurrentPattern(ExpandCollapsePattern.Pattern,
                     out pattern) || childHandle.TryGetCurrentPattern(
                     InvokePattern.Pattern, out invokePattern) ||
@@ -205,8 +211,10 @@ namespace Ldtpd
                             case "Show":
                             case "Select":
                             case "Verify":
-                                elementItem = utils.GetObjectHandle(childHandle, "Open",
-                                    type, !verify);
+//                                elementItem = utils.GetObjectHandle(childHandle, "Open",
+//                                    type, !verify);
+                                elementItem = null;
+
                                 if (invokePattern != null || (elementItem != null &&
                                     elementItem.TryGetCurrentPattern(InvokePattern.Pattern,
                                     out invokePattern)))
@@ -236,8 +244,10 @@ namespace Ldtpd
                             case "GetComboValue":
                                 Object selectionPattern = null;
                                 LogMessage("GetComboValue");
-                                elementItem = utils.GetObjectHandle(childHandle, "Open",
-                                    type, true);
+//                                elementItem = utils.GetObjectHandle(childHandle, "Open",
+//                                    type, true);
+                                elementItem = null;
+
                                 if (invokePattern != null || (elementItem != null &&
                                     elementItem.TryGetCurrentPattern(InvokePattern.Pattern,
                                     out invokePattern)))
@@ -254,6 +264,14 @@ namespace Ldtpd
                                     LogMessage("ExpandCollapsePattern");
                                     ((ExpandCollapsePattern)pattern).Expand();
                                 }
+                                Object valuePattern;
+                                if (childHandle.TryGetCurrentPattern(ValuePattern.Pattern,
+                                        out valuePattern))
+                                {
+                                    selectedItem = ((ValuePattern)valuePattern).Current.Value;
+                                    return 1;
+                                }
+
                                 // Required to wait 1 second,
                                 // before checking the state and retry expanding
                                 utils.InternalWait(1);
@@ -397,8 +415,22 @@ namespace Ldtpd
                 ((ExpandCollapsePattern)pattern).Expand();
             }
             childHandle.SetFocus();
-            AutomationElementCollection c = childHandle.FindAll(TreeScope.Children,
+            AutomationElementCollection c = childHandle.FindAll(TreeScope.Descendants,
                 Condition.TrueCondition);
+
+            Object invokePattern;
+            if (childHandle.TryGetCurrentPattern(
+                InvokePattern.Pattern, out invokePattern))
+            {
+                ((InvokePattern)invokePattern).Invoke();
+            }
+            Object expandPattern;
+            if (childHandle.TryGetCurrentPattern(ExpandCollapsePattern.Pattern,
+                out expandPattern))
+            {
+                ((ExpandCollapsePattern)expandPattern).Expand();
+            }
+
             childHandle = null;
             AutomationElement element = null;
             try
@@ -428,6 +460,15 @@ namespace Ldtpd
                 {
                     LogMessage(element.Current.Name + " : " +
                         element.Current.ControlType.ProgrammaticName);
+
+                    utils.InternalWait(1);
+
+                    if (element.TryGetCurrentPattern(ScrollItemPattern.Pattern,
+                        out pattern))
+                    {
+                        LogMessage("ScrollItemPattern");
+                        ((ScrollItemPattern)pattern).ScrollIntoView();
+                    }
                     if (element.TryGetCurrentPattern(SelectionItemPattern.Pattern,
                         out pattern))
                     {
