@@ -39,6 +39,7 @@ _python3 = False
 _python26 = False
 _httpCon = 0
 _onair = 0
+_spawnedDaemon = 0
 if sys.version_info[:2] <= (2, 6):
     _python26 = True
 if sys.version_info[:2] >= (3, 0):
@@ -133,6 +134,7 @@ class Transport(xmlrpclib.Transport):
     def request(self, host, handler, request_body, verbose=0):
         global _httpCon
         global _onair
+        global _spawnedDaemon
         # issue XML-RPC request
         retry_count = 1
         while True:
@@ -197,7 +199,9 @@ class Transport(xmlrpclib.Transport):
                             sigalrm = signal.signal(signal.SIGALRM, self._handle_signal)
                             sigchld = signal.signal(signal.SIGCHLD, self._handle_signal)
                         _httpCon = 0
-                        self._spawn_daemon()
+                        if(_spawnedDaemon == 0):
+                            self._spawn_daemon()
+                            _spawnedDaemon = 1
                         if _ldtp_windows_env:
                             time.sleep(5)
                         else:
