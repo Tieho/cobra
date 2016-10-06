@@ -67,6 +67,9 @@ namespace Ldtpd
                 throw new XmlRpcFaultException(123,
                     "Argument cannot be null or empty.");
             }
+
+            element.SetFocus();
+
             LogMessage("SelectListItem Element: " + element.Current.Name +
                 " - Type: " + element.Current.ControlType.ProgrammaticName);
             Object pattern = null;
@@ -74,6 +77,15 @@ namespace Ldtpd
             try
             {
                 utils.InternalWait(1);
+
+                String enterKeys = itemText;
+
+                if(enterKeys.StartsWith("*"))
+                    enterKeys = enterKeys.Remove(0, 1);
+
+                Keyboard kb = new Keyboard(utils);
+                kb.GenerateKeyEvent(enterKeys);
+
                 elementItem = utils.GetObjectHandle(element, itemText);
                 if (elementItem != null)
                 {
