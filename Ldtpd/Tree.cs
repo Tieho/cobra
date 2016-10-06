@@ -51,10 +51,10 @@ namespace Ldtpd
             string objName, ControlType[] type = null, bool waitForObj = true)
         {
             if (type == null)
-                type = new ControlType[6] { ControlType.Tree,
+                type = new ControlType[7] { ControlType.Tree,
                     ControlType.List, ControlType.Table,
                     ControlType.DataItem, ControlType.ListItem,
-                    ControlType.TreeItem };
+                    ControlType.TreeItem, ControlType.Custom };
             try
             {
                 return utils.GetObjectHandle(windowName,
@@ -271,6 +271,12 @@ namespace Ldtpd
                         utils.InternalClick(elementItem);
                         return 1;
                     }
+                    else if (elementItem.TryGetCurrentPattern(
+                        LegacyIAccessiblePattern.Pattern, out pattern))
+                    {
+                        utils.InternalClick(elementItem);
+                        return 1;
+                    }                    
                     else if (elementItem.TryGetCurrentPattern(
                         ExpandCollapsePattern.Pattern, out pattern))
                     {
