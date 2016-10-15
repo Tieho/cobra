@@ -416,10 +416,10 @@ class ooldtp:
         return self._remote_launchapp(cmd, args, delay, env, lang)
     def hasstate(self, window_name, object_name, state, guiTimeOut = 0):
         return self._remote_hasstate(window_name, object_name, state, guiTimeOut)
-    def searchrow(self, window_name, object_name, row_text, maxRows, searchDown):
-        return self._remote_searchrow(window_name, object_name, row_text, False, maxRows, searchDown)
-    def setmaxpagesselectrowsearches(self, maxRows):
-        return self._remote_setmaxpagesselectrowsearches(maxRows)
+    def searchrow(self, window_name, object_name, row_text, maxPages, searchDown):
+        return self._remote_searchrow(window_name, object_name, row_text, False, maxPages, searchDown)
+    def setmaxpagesselectrowsearches(self, maxPages):
+        return self._remote_setmaxpagesselectrowsearches(maxPages)
     def selectrow(self, window_name, object_name, row_text):
         return self._remote_selectrow(window_name, object_name, row_text, False)
     def doesrowexist(self, window_name, object_name, row_text, partial_match = False):
