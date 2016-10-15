@@ -1690,6 +1690,20 @@ namespace Ldtpd
                 tree = null;
             }
         }
+        [XmlRpcMethod("expandcollapseclick",
+            Description = "Mouse left click on row's expand/collapse icon in the given table.")]
+        public int ExpandCollapseClick(String windowName, String objName, String text)
+        {
+            Tree tree = new Tree(this);
+            try
+            {
+                return tree.ExpandCollapseClick(windowName, objName, text);
+            }
+            finally
+            {
+                tree = null;
+            }
+        }
         [XmlRpcMethod("mouserightclick",
             Description = "Mouse left click on an object.")]
         public int MouseRightClick(String windowName, String objName)

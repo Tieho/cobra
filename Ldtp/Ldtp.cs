@@ -224,6 +224,8 @@ namespace Ldtp
         int SingleClickRow(String windowName, String objName, String text);
         [XmlRpcMethod("rightclick")]
         int RightClick(String windowName, String objName, String text);
+        [XmlRpcMethod("expandcollapseclick")]
+        int ExpandCollapseClick(String windowName, String objName, String text);
         [XmlRpcMethod("simulatemousemove")]
         int SimulateMouseMove(int source_x, int source_y, int dest_x,
             int dest_y, double delay = 0.0);
