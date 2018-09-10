@@ -265,7 +265,7 @@ namespace Ldtpd
                 true, null, windowHandle.Current.Name);
             if (utils.debug || utils.writeToFile != null)
             {
-                LogMessage(objectList.Count);
+                LogMessage("objectList.Count : " + objectList.Count);
                 foreach (string key in objectHT.Keys)
                 {
                     LogMessage("Key: " + ((Hashtable)objectHT[key])["key"]);
