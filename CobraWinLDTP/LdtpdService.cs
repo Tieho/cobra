@@ -92,8 +92,8 @@ namespace WinLdtpdService
             HttpListenerContext context;
             try
             {
-                if (debug)
-                    Console.WriteLine("Processing request");
+//                if (debug)
+//                    Console.WriteLine("Processing request");
                 HttpListener listener = (HttpListener)result.AsyncState;
                 // Call EndGetContext to complete the asynchronous operation.
                 context = listener.EndGetContext(result);
@@ -130,8 +130,8 @@ namespace WinLdtpdService
                     try
                     {
                         GC.Collect();
-                        if (ldtpService.debug)
-                            Console.WriteLine("Waiting for clients");
+//                        if (ldtpService.debug)
+//                            Console.WriteLine("Waiting for clients");
                         result = ldtpService.listener.BeginGetContext(
                             new AsyncCallback(ldtpService.ListenerCallback),
                             ldtpService.listener);
@@ -229,15 +229,15 @@ namespace WinLdtpdService
                     GC.Collect();
                     try
                     {
-                        if (debug)
-                            Console.WriteLine("Waiting for clients");
+//                        if (debug)
+//                            Console.WriteLine("Waiting for clients");
                         HttpListenerContext context = listener.GetContext();
                         // Don't create LDTP instance here, this creates
                         // new object for every request !
                         // Moved before creating HttpListenerContext
                         //XmlRpcListenerService svc = new LdtpdMain();
-                        if (debug)
-                            Console.WriteLine("Processing request");
+//                        if (debug)
+//                            Console.WriteLine("Processing request");
                         svc.ProcessRequest(context);
                         /*
                         // FIXME: If trying to do parallel process
