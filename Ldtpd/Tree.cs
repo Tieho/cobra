@@ -684,7 +684,8 @@ namespace Ldtpd
                     condition);
                 try
                 {
-                    element = c[index];
+                    int columns = GetColumnCount(c);
+                    element = c[index * columns];
                     element.SetFocus();
                 }
                 catch (IndexOutOfRangeException)
@@ -776,7 +777,8 @@ namespace Ldtpd
                     condition);
                 try
                 {
-                    element = c[index];
+                    int columns = GetColumnCount(c);
+                    element = c[index * columns];
                 }
                 catch (IndexOutOfRangeException)
                 {
@@ -861,9 +863,9 @@ namespace Ldtpd
                 childHandle.SetFocus();
                 AutomationElementCollection c = childHandle.FindAll(
                     TreeScope.Children, condition1);
-                element = c[row];
-                c = element.FindAll(TreeScope.Children, condition2);
-                element = c[column];
+
+                int columns = GetColumnCount(c);
+                element = c[row * columns + column];
                 c = null;
                 if (element != null)
                 {
@@ -871,6 +873,13 @@ namespace Ldtpd
                     {
                         throw new XmlRpcFaultException(123,
                             "Not implemented");
+                    }
+                    else if (element.Current.ControlType == ControlType.TreeItem)
+                    {
+                        var editorValuePattern = element.GetCurrentPattern(LegacyIAccessiblePattern.Pattern) as LegacyIAccessiblePattern;
+                        editorValuePattern.SetValue(data);
+
+                        return 1;
                     }
                     else
                     {
@@ -898,19 +907,19 @@ namespace Ldtpd
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "IndexOutOfRangeException: " + "(" + row + ", " + column + "): " + ex);
             }
             catch (ArgumentException ex)
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "ArgumentException: " + "(" + row + ", " + column + "): " + ex);
             }
             catch (Exception ex)
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "Exception: " + "(" + row + ", " + column + "): " + ex);
             }
             finally
             {
@@ -950,14 +959,43 @@ namespace Ldtpd
                 childHandle.SetFocus();
                 AutomationElementCollection c = childHandle.FindAll(
                     TreeScope.Children, condition1);
-                element = c[row];
-                c = element.FindAll(TreeScope.Children, condition2);
-                element = c[column];
+                int columns = GetColumnCount(c);
+                element = c[row * columns + column];
                 c = null;
                 if (element != null)
                 {
                     if (element.Current.ControlType == ControlType.Text)
+                    {
                         return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.Custom)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.List)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.ListItem)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.Tree)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.TreeItem)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.Table)
+                    {
+                        return element.Current.Name;
+                    }
+                    else if (element.Current.ControlType == ControlType.DataItem)
+                    {
+                        return element.Current.Name;
+                    }
                     else
                     {
                         //try use msaa to access value
@@ -994,19 +1032,19 @@ namespace Ldtpd
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "IndexOutOfRangeException: " + "(" + row + ", " + column + "). Ex: " + ex);
             }
             catch (ArgumentException ex)
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "ArgumentException: " + "(" + row + ", " + column + "). Ex: " + ex);
             }
             catch (Exception ex)
             {
                 LogMessage(ex);
                 throw new XmlRpcFaultException(123,
-                    "Index out of range: " + "(" + row + ", " + column + ")");
+                    "Exception: " + "(" + row + ", " + column + "). Ex: " + ex);
             }
             finally
             {
@@ -1046,9 +1084,8 @@ namespace Ldtpd
                 childHandle.SetFocus();
                 AutomationElementCollection c = childHandle.FindAll(
                     TreeScope.Children, condition1);
-                element = c[row];
-                c = element.FindAll(TreeScope.Children, condition2);
-                element = c[column];
+                int columns = GetColumnCount(c);
+                element = c[row * columns + column];
                 c = null;
                 if (element != null)
                 {
@@ -1108,18 +1145,13 @@ namespace Ldtpd
             Condition condition2 = new OrCondition(prop4, prop5);
             try
             {
-                int count = GetRowCount(windowName, objName);
                 childHandle.SetFocus();
                 c1 = childHandle.FindAll(TreeScope.Children, condition1);
-                for (int i = 0; i < count; i++)
+                int columns = GetColumnCount(c1);
+                for (int i = 0; i < c1.Count; i++)
                 {
-                    c2 = c1[i].FindAll(TreeScope.Children, condition2);
-                    for (int j = 0; j < c2.Count; j++)
-                    {
-                        if (utils.common.WildcardMatch(c2[j].Current.Name,
-                            cellValue))
-                            return i;
-                    }
+                    if (utils.common.WildcardMatch(c1[i].Current.Name, cellValue))
+                        return i / columns;
                 }
             }
             catch (Exception ex)
@@ -1135,6 +1167,67 @@ namespace Ldtpd
             }
             throw new XmlRpcFaultException(123,
                     "Unable to get row index: " + cellValue);
+        }
+        private int GetColumnCount(AutomationElementCollection items)
+        {
+            // Resolve column count by checking when item's Y coordinate changes from previous item's Y coordinate (no other way, it seems)
+            int columns = 0;
+
+            for(int i = 0; i < items.Count; i++)
+            {
+                if(i > 0 && items[i].Current.BoundingRectangle.Y != items[i-1].Current.BoundingRectangle.Y)
+                    break;
+
+                columns++;                        
+            }
+
+            return columns;
+        }
+        public int GetColumnCount(String windowName, String objName)
+        {
+            AutomationElement childHandle = GetObjectHandle(windowName,
+                objName);
+            if (!utils.IsEnabled(childHandle))
+            {
+                childHandle = null;
+                throw new XmlRpcFaultException(123,
+                    "Object state is disabled");
+            }
+            AutomationElementCollection c;
+            Condition prop1 = new PropertyCondition(
+                AutomationElement.ControlTypeProperty, ControlType.ListItem);
+            Condition prop2 = new PropertyCondition(
+                AutomationElement.ControlTypeProperty, ControlType.TreeItem);
+            Condition prop3 = new PropertyCondition(
+                AutomationElement.ControlTypeProperty, ControlType.DataItem);
+            Condition prop4 = new PropertyCondition(
+                AutomationElement.ControlTypeProperty, ControlType.Custom);
+            Condition condition = new OrCondition(prop1, prop2, prop3, prop4);
+            try
+            {
+                c = childHandle.FindAll(TreeScope.Children, condition);
+                if (c == null)
+                    throw new XmlRpcFaultException(123,
+                        "Unable to get row count.");
+
+                int columns = GetColumnCount(c);                    
+                return columns;
+            }
+            catch (Exception ex)
+            {
+                LogMessage(ex);
+                if (ex is XmlRpcFaultException)
+                    throw;
+                else
+                    throw new XmlRpcFaultException(123,
+                        "Unhandled exception: " + ex.Message);
+            }
+            finally
+            {
+                c = null;
+                childHandle = null;
+                prop1 = prop2 = prop3 = prop4 = condition = null;
+            }
         }
         public int GetRowCount(String windowName, String objName)
         {
@@ -1162,7 +1255,13 @@ namespace Ldtpd
                 if (c == null)
                     throw new XmlRpcFaultException(123,
                         "Unable to get row count.");
-                return c.Count;
+
+                int columns = GetColumnCount(c);
+
+                if(columns == 0)
+                    return 0;
+
+                return c.Count / columns;
             }
             catch (Exception ex)
             {
@@ -1301,9 +1400,8 @@ namespace Ldtpd
                 childHandle.SetFocus();
                 AutomationElementCollection c = childHandle.FindAll(
                     TreeScope.Children, condition1);
-                element = c[row];
-                c = element.FindAll(TreeScope.Children, condition2);
-                element = c[column];
+                int columns = GetColumnCount(c);
+                element = c[row * columns + column];
                 c = null;
                 if (element != null)
                 {
