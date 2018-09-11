@@ -100,7 +100,7 @@ namespace Ldtpd
                         {
                             // New parent window is available, add it to the list
                             this.Add(element);
-                            common.LogMessage(element.Current.Name);
+                            common.LogMessage("New window (parent): " + element.Current.Name);
                         }
                     }
                     catch (System.UnauthorizedAccessException ex)
@@ -128,7 +128,7 @@ namespace Ldtpd
                             {
                                 // New subwindow is available, add it to the list
                                 this.Add(e);
-                                common.LogMessage(e.Current.Name);
+                                common.LogMessage("New window (sub): " + e.Current.Name);
                             }
                         }
                         catch (System.UnauthorizedAccessException ex)
@@ -139,6 +139,7 @@ namespace Ldtpd
                             // In case of an exception during IndexOf-call, the program adds the element as
                             // new element to the windowList. Same code like on other positions.
                             this.Add(e);
+                            common.LogMessage("New window (via System.UnauthorizedAccessException exception): " + e.Current.Name);
                         }
                         finally
                         {
@@ -208,6 +209,7 @@ namespace Ldtpd
                     {
                         // Remove element from the list
                         this.Remove(el);
+                        common.LogMessage("Removed window (CleanUpWindowElements): " + el.Current.Name);
                     }
                     catch (Exception ex)
                     {
@@ -306,7 +308,11 @@ namespace Ldtpd
                             " : " + element.Current.Name + " : " + rid);
 
                         if (this.IndexOf(element) == -1)
+                        {
                             this.Add(element);
+                            common.LogMessage("New window (OnWindowCreate): " + element.Current.Name);
+                        }
+
                         common.LogMessage("Window list count: " +
                             this.Count);
                         foreach (string windowName in watchWindowList)
@@ -349,7 +355,10 @@ namespace Ldtpd
                             element.Current.ControlType.ProgrammaticName +
                             " : " + windowName + " : " + rid);
                         if (this.IndexOf(element) != -1)
+                        {
                             this.Remove(element);
+                            common.LogMessage("Removed window (OnWindowDelete): " + element.Current.Name);
+                        }
                         common.LogMessage("Removed - Window list count: " +
                             this.Count);
                     }
