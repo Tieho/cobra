@@ -159,7 +159,7 @@ namespace Ldtpd
                     try
                     {
                         Rect rect = e.Current.BoundingRectangle;
-                        if (rect.Width == 0 && rect.Height == 0)
+                        if ((rect.Width == 0 && rect.Height == 0) || e.Current.IsOffscreen)
                         {
                             // Window no longer exist
                             windowTmpList.Add(e);
@@ -250,6 +250,7 @@ namespace Ldtpd
                         {
                             // Remove element from the list
                             windowList.Remove(e);
+                            LogMessage("Removed window (InternalGetWindowHandle): " + e.Current.Name);
                         }
                         catch (Exception ex)
                         {
@@ -294,8 +295,10 @@ namespace Ldtpd
                         }
 
                         if (index == -1)
+                        {
                             windowList.Add(element);
-
+                            LogMessage("New window (InternalGetWindowHandle 1): " + element.Current.Name);
+                        }
                     }
                     catch (System.UnauthorizedAccessException ex)
                     {
@@ -350,7 +353,10 @@ namespace Ldtpd
                             }
 
                             if (index == -1)
+                            {
                                 windowList.Add(element);
+                                LogMessage("New window (InternalGetWindowHandle 2): " + element.Current.Name);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -1033,7 +1039,10 @@ namespace Ldtpd
                             }
 
                             if (Index == -1)
+                            {
                                 windowList.Add(element);
+                                LogMessage("New window (InternalWaitTillControlTypeExist): " + element.Current.Name);
+                            }
 /*
                             if (windowList.IndexOf(element) == -1) // original code
                                 // Add parent window handle,
