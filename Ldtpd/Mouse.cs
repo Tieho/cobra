@@ -216,6 +216,47 @@ namespace Ldtpd
             }
             throw new XmlRpcFaultException(123, "Unable to perform action");
         }
+        public int TripleClick(String windowName, String objName)
+        {
+            AutomationElement childHandle;
+            try
+            {
+                childHandle = utils.GetObjectHandle(windowName, objName);
+                if (!utils.IsEnabled(childHandle))
+                {
+                    throw new XmlRpcFaultException(123,
+                        "Object state is disabled");
+                }
+                try
+                {
+                    childHandle.SetFocus();
+                }
+                catch (Exception ex)
+                {
+                    // Have noticed exception with
+                    // maximize / minimize button
+                    LogMessage(ex);
+                }
+                Rect rect = childHandle.Current.BoundingRectangle;
+                GenerateMouseEvent((int)(rect.X + rect.Width / 2),
+                    (int)(rect.Y + rect.Height / 2), "b1t");
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                LogMessage(ex);
+                if (ex is XmlRpcFaultException)
+                    throw;
+                else
+                    throw new XmlRpcFaultException(123,
+                        "Unhandled exception: " + ex.Message);
+            }
+            finally
+            {
+                childHandle = null;
+            }
+            throw new XmlRpcFaultException(123, "Unable to perform action");
+        }
         public int MouseMove(String windowName, String objName)
         {
             AutomationElement childHandle;
@@ -275,6 +316,15 @@ namespace Ldtpd
                     break;
                 case "b1d":
                     Input.MoveTo(pt);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftDown);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftUp);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftDown);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftUp);
+                    break;
+                case "b1t":
+                    Input.MoveTo(pt);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftDown);
+                    Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftUp);
                     Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftDown);
                     Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftUp);
                     Input.SendMouseInput(0, 0, 0, SendMouseInputFlags.LeftDown);
