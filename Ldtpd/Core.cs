@@ -1255,6 +1255,20 @@ namespace Ldtpd
                 tree = null;
             }
         }
+        [XmlRpcMethod("getcolumncount",
+            Description = "Get tree table cell column count.")]
+        public int GetColumnCount(String windowName, String objName)
+        {
+            Tree tree = new Tree(this);
+            try
+            {
+                return tree.GetColumnCount(windowName, objName);
+            }
+            finally
+            {
+                tree = null;
+            }
+        }
         [XmlRpcMethod("getrowcount",
             Description = "Get tree table cell row count.")]
         public int GetRowCount(String windowName, String objName)
@@ -1726,6 +1740,20 @@ namespace Ldtpd
             try
             {
                 return mouse.DoubleClick(windowName, objName);
+            }
+            finally
+            {
+                mouse = null;
+            }
+        }
+        [XmlRpcMethod("tripleclick",
+            Description = "Mouse triple click on an object.")]
+        public int TripleClick(String windowName, String objName)
+        {
+            Mouse mouse = new Mouse(this);
+            try
+            {
+                return mouse.TripleClick(windowName, objName);
             }
             finally
             {

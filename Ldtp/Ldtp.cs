@@ -216,6 +216,8 @@ namespace Ldtp
         int MouseRightClick(String windowName, String objName);
         [XmlRpcMethod("doubleclick")]
         int DoubleClick(String windowName, String objName);
+        [XmlRpcMethod("tripleclick")]
+        int TripleClick(String windowName, String objName);
         [XmlRpcMethod("doubleclickrow")]
         int DoubleClickRow(String windowName, String objName, String text);
         [XmlRpcMethod("doubleclickrowindex")]
@@ -224,8 +226,6 @@ namespace Ldtp
         int SingleClickRow(String windowName, String objName, String text);
         [XmlRpcMethod("rightclick")]
         int RightClick(String windowName, String objName, String text);
-        [XmlRpcMethod("expandcollapseclick")]
-        int ExpandCollapseClick(String windowName, String objName, String text);
         [XmlRpcMethod("simulatemousemove")]
         int SimulateMouseMove(int source_x, int source_y, int dest_x,
             int dest_y, double delay = 0.0);
@@ -239,6 +239,8 @@ namespace Ldtp
         int GetTabCount(String windowName, String objName);
         [XmlRpcMethod("verifytabname")]
         int VerifyTabName(String windowName, String objName, String tabName);
+        [XmlRpcMethod("getcolumncount")]
+        int GetColumnCount(String windowName, String objName);
         [XmlRpcMethod("getrowcount")]
         int GetRowCount(String windowName, String objName);
         [XmlRpcMethod("searchrow")]
@@ -1384,6 +1386,17 @@ namespace Ldtp
                 throw new LdtpExecutionError(ex.FaultString);
             }
         }
+        public int TripleClick(String objName)
+        {
+            try
+            {
+                return proxy.TripleClick(windowName, objName);
+            }
+            catch (XmlRpcFaultException ex)
+            {
+                throw new LdtpExecutionError(ex.FaultString);
+            }
+        }
         public int DoubleClickRow(String objName, String text)
         {
             try
@@ -1489,6 +1502,17 @@ namespace Ldtp
             try
             {
                 return proxy.VerifyTabName(windowName, objName, tabName);
+            }
+            catch (XmlRpcFaultException ex)
+            {
+                throw new LdtpExecutionError(ex.FaultString);
+            }
+        }
+        public int GetColumnCount(String objName)
+        {
+            try
+            {
+                return proxy.GetColumnCount(windowName, objName);
             }
             catch (XmlRpcFaultException ex)
             {
